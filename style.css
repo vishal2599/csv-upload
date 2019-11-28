@@ -1,0 +1,37 @@
+.row {
+    display: flex;
+    margin: 25px -15px;
+}
+
+.col-sm-12,
+.col-sm-8,
+.col-sm-6,
+.col-sm-4 {
+    padding: 0 30px;
+}
+
+.col-sm-12 {
+    width: 100%;
+}
+
+.col-sm-8 {
+    width: 100%;
+}
+
+.col-sm-6 {
+    width: 66.66%;
+}
+
+.col-sm-4 {
+    width: 33.33%;
+}
+
+.row input,
+.row select {
+    width: 100%;
+}
+
+.row input[type=submit],
+.row input[type=checkbox] {
+    width: auto;
+}
