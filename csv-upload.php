@@ -21,21 +21,21 @@ error_reporting(E_ALL);
 global $csv_import_version;
 $csv_import_version = '1.0.0';
 
-function csv_import_setup_post_type()
-{
-    register_post_type(
-        'csv_data',
-        array(
-            'labels'      => array(
-                'name'          => __('CSVs'),
-                'singular_name' => __('CSV'),
-            ),
-            'public'      => true,
-            'has_archive' => true,
-            'rewrite'     => array('slug' => 'csv-data'), // my custom slug
-        )
-    );
-}
+// function csv_import_setup_post_type()
+// {
+//     register_post_type(
+//         'csv_data',
+//         array(
+//             'labels'      => array(
+//                 'name'          => __('CSVs'),
+//                 'singular_name' => __('CSV'),
+//             ),
+//             'public'      => true,
+//             'has_archive' => true,
+//             'rewrite'     => array('slug' => 'csv-data'), // my custom slug
+//         )
+//     );
+// }
 
 function csv_import_install()
 {
