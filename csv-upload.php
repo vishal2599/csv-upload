@@ -2,69 +2,71 @@
 
 /**
  * Plugin Name: CSV Upload
- * Plugin URI: http://www.mywebsite.com/csv-upload
+ * Plugin URI: 
  * Description: Just Upload a CSV and see the Magic Table.
- * Version: 1.0
+ * Version: 1.0.0
  * Author: Vishal Singh
- * Author URI: http://www.mywebsite.com
+ * Author URI: 
  */
 
-error_reporting(E_ALL);
 
-include __DIR__ . '/columns-class.php';
+include __DIR__ . '/uninstall.php';
 
-
-global $csv_upload_version;
-$csv_upload_version = '1.0.0';
-
-function csv_upload_install()
-{
-    global $wpdb;
-    global $csv_upload_version;
-
-    $table_name = $wpdb->prefix . 'all-csv-tables';
-
-    $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE $table_name (
-		id mediumint(9) NOT NULL AUTO_INCREMENT,
-		time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-		name tinytext NOT NULL,
-		text text NOT NULL,
-		url varchar(55) DEFAULT '' NOT NULL,
-		PRIMARY KEY  (id)
-	) $charset_collate;";
-
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
-
-    add_option('csv_upload_version', $csv_upload_version);
+if (!function_exists('wp_handle_upload')) {
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
 }
 
-function csv_upload_install_data()
+//global $campaigns_list;
+error_reporting(E_ALL);
+global $csv_import_version;
+$csv_import_version = '1.0.0';
+
+function csv_import_setup_post_type()
 {
-    global $wpdb;
-
-    $welcome_name = 'Hello There!';
-    $welcome_text = 'Congratulations, you just completed the installation!';
-
-    $table_name = $wpdb->prefix . 'all-csv-tables';
-
-    $wpdb->insert(
-        $table_name,
+    register_post_type(
+        'csv_data',
         array(
-            'time' => current_time('mysql'),
-            'name' => $welcome_name,
-            'text' => $welcome_text,
+            'labels'      => array(
+                'name'          => __('CSVs'),
+                'singular_name' => __('CSV'),
+            ),
+            'public'      => true,
+            'has_archive' => true,
+            'rewrite'     => array('slug' => 'csv-data'), // my custom slug
         )
     );
 }
 
-register_activation_hook(__FILE__, 'csv_upload_install');
-register_activation_hook(__FILE__, 'csv_upload_install_data');
+function csv_import_install()
+{
+    global $wpdb;
+    global $csv_import_version;
 
-add_action('admin_menu', 'csv_upload_menu');
-function csv_upload_menu()
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    // csv_import_setup_post_type();
+    //add_action('init', 'csv_import_setup_post_type');
+
+    // flush_rewrite_rules();
+    $csv_table = $wpdb->prefix . 'all_csv_tables';
+
+    $charset_collate = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE " . $csv_table . " IF NOT EXISTS (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL,
+        status tinyint NOT NULL DEFAULT 0,
+        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY  (id)
+    ) " . $charset_collate . ";";
+
+    dbDelta($sql);
+    update_option('csv_import_version', $csv_import_version);
+}
+
+register_activation_hook(__FILE__, 'csv_import_install');
+
+add_action('admin_menu', 'csv_import_menu');
+function csv_import_menu()
 {
     $page_title = 'All Tables';
     $menu_title = 'All Tables';
@@ -96,4 +98,18 @@ function csv_upload_menu()
 
 wp_enqueue_style('csv-upload-style', plugin_dir_url(__FILE__) . 'style.css', array(), '1.0', 'all');
 
+
 add_filter('set-screen-option', 'set_screen', 10, 3);
+
+function csv_import_screen_option()
+{
+
+    $option = 'csv_per_page';
+    $args   = [
+        'label'   => 'CSV Tables',
+        'default' => 10,
+        'option'  => 'csv_tables_per_page'
+    ];
+
+    add_screen_option($option, $args);
+}
